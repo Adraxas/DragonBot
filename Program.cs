@@ -1,5 +1,6 @@
 ﻿using Discord;
 using DragonBot.Instance;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -11,14 +12,15 @@ namespace DragonBot
         internal static GlobalSettings? Settings;
         public static async Task Main(string[] args)
         {
-            await Init();
             if (Environment.GetCommandLineArgs().Contains("-init"))
             {
                 Environment.Exit(0);
             }
+            await Run();
             await Task.Delay(-1);
         }
-        private static async Task Init()
+        [ModuleInitializer]
+        internal static void Init()
         {
             string DefaultBaseDir = AppContext.BaseDirectory;
 #if DEBUG
@@ -35,11 +37,15 @@ namespace DragonBot
             else
             {
                 Settings = new() { BaseDir = DefaultBaseDir };
-                await using StreamWriter w = new($"{AppContext.BaseDirectory}/settings.json");
-                await w.WriteAsync(JsonSerializer.Serialize(Settings));
+                using StreamWriter w = new($"{AppContext.BaseDirectory}/settings.json");
+                w.Write(JsonSerializer.Serialize(Settings));
             }
             Directory.CreateDirectory(Settings.InstanceConfigsDir);
-            var configs = Directory.EnumerateFiles(Settings.InstanceConfigsDir);
+            
+        }
+        private static async Task Run()
+        {
+            var configs = Directory.EnumerateFiles(Settings!.InstanceConfigsDir);
             if (configs.Any())
             {
                 foreach (var config in configs)
@@ -57,6 +63,13 @@ namespace DragonBot
             Directory.CreateDirectory(Settings!.LogDir);
             await using StreamWriter outputFile = new(Path.Combine(Settings!.LogDir, "latest.log"));
             await outputFile.WriteAsync($"{DateTime.Now} {logMessage.Severity}:{logMessage.Message}");
+            await Task.CompletedTask;
+        }
+        internal static async Task Log(string message, LogSeverity severity)
+        {
+            Directory.CreateDirectory(Settings!.LogDir);
+            await using StreamWriter outputFile = new(Path.Combine(Settings!.LogDir, "latest.log"));
+            await outputFile.WriteAsync($"{DateTime.Now} {severity}:{message}");
             await Task.CompletedTask;
         }
         internal record GlobalSettings([property: JsonPropertyName("singleInstance")] bool SingleInstance = true)

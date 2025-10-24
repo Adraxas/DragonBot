@@ -24,7 +24,7 @@ namespace DragonBot.Instance
             IConfigurationRoot config = new ConfigurationBuilder()
             .AddUserSecrets<Bot>()
             .Build();
-            DefaultToken = config.GetSection("BotToken").Value;
+            DefaultToken = config.GetSection("BotToken").Value!;
 #endif
             if (File.Exists($"{Settings!.InstanceConfigsDir}/{botName}.json"))
             {
