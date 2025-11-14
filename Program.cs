@@ -1,4 +1,5 @@
 ﻿using Discord;
+using DragonBot.Core;
 using DragonBot.Instance;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -16,6 +17,7 @@ namespace DragonBot
             {
                 Environment.Exit(0);
             }
+            await RegisterModuleAttribute.RegisterModulesAsync();
             await Run();
             await Task.Delay(-1);
         }
@@ -23,7 +25,7 @@ namespace DragonBot
         internal static void Init()
         {
             string DefaultBaseDir = AppContext.BaseDirectory;
-#if DEBUG
+#if DEsBUG
             File.Delete($"{DefaultBaseDir}/settings.json");
             Directory.Delete($"{DefaultBaseDir}/logs", true);
             Directory.Delete($"{DefaultBaseDir}/instances", true);
@@ -41,7 +43,7 @@ namespace DragonBot
                 w.Write(JsonSerializer.Serialize(Settings));
             }
             Directory.CreateDirectory(Settings.InstanceConfigsDir);
-            
+            ModuleInitilaizer.Patch();
         }
         private static async Task Run()
         {

@@ -10,23 +10,12 @@ using System.Threading.Tasks;
 
 namespace DragonBot.Modules
 {
-    internal abstract class ModuleBase : IModule
+    internal abstract class ModuleBase
     {
         const string Name = "ModuleBase";
         public static async void Register()
         {
-            var state = await ModuleRegistrar.Register(Name, MethodBase.GetCurrentMethod()?.DeclaringType?.GetMethod("Create")?.CreateDelegate<Action>());
-            if (state == RegistrationState.Success)
-            {
-                await Program.Log($"{Name} registered successfully.", LogSeverity.Info);
-            }
-            else
-            {
-
-            }
-        }
-        internal static ModuleBase Create()
-        {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }

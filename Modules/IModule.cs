@@ -5,7 +5,7 @@ namespace DragonBot.Modules
 {
     public interface IModule
     {
-        public static abstract void Register();
+        public static abstract Task Register();
     }
     internal interface ICoreModule : IModule
     {

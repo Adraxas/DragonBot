@@ -10,15 +10,16 @@ using System.Threading.Tasks;
 
 namespace DragonBot.Modules
 {
+    [RegisterModule]
     internal class ButtonMessage : ModuleBase, ICoreModule
     {
         const string Name = "ButtonMessage";
-        
-        internal static void reg()
+
+        public static async new Task Register()
         {
-            ButtonMessage.Register();
+            await Program.Log("Derived", LogSeverity.Debug);
         }
-        internal new static ButtonMessage Create()
+        internal static ButtonMessage Create()
         {
             return new ButtonMessage();
         }
