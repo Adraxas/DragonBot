@@ -29,10 +29,10 @@ namespace DragonBot.Core
                 {
                     if (((ModuleRegistrationExeption)ex).Fatal)
                     {
-                        await Program.Log($"ModuleRegistrationExeption thrown in registration {name} with reason {ex.Message}. This is a fatal error and should never happen. Program will now exit.", LogSeverity.Critical);
+                        await Program.Log($"ModuleRegistrationExeption thrown in registration of module {name} with reason {ex.Message}. This is a fatal error and should never happen. Program will now exit.", LogSeverity.Critical);
                         Environment.Exit(-1);
                     }
-                    await Program.Log($"ModuleRegistrationExeption thrown in registration {name} with reason {ex.Message}.", LogSeverity.Error);
+                    await Program.Log($"ModuleRegistrationExeption thrown in registration of module {name} with reason {ex.Message}.", LogSeverity.Error);
                 }
                 else if (name.StartsWith("Core:"))
                 {
@@ -61,7 +61,7 @@ namespace DragonBot.Core
         {
             var targets = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
-                .Where(x => x.IsClass && x.IsSubclassOf(typeof(ModuleBase)) && typeof(IModule).IsAssignableFrom(x) && x.GetCustomAttributes(typeof(RegisterModuleAttribute), false).Length != 0);
+                .Where(x => x.IsClass && x.IsSubclassOf(typeof(ModuleBase)) && typeof(IModule<>).IsAssignableFrom(x) && x.GetCustomAttributes(typeof(RegisterModuleAttribute), false).Length != 0);
 
             foreach (var target in targets)
             {
@@ -80,7 +80,7 @@ namespace DragonBot.Core
                         case RegistrationState.ErrorThrown:
                             break;
                         case RegistrationState.AlreadyRegistered:
-                            AsyncContext.Run(() => Program.Log($"Module {name} has already been registered. Did you forget to namespace your modules name. (ex: yourname:modulename)", LogSeverity.Error));
+                            AsyncContext.Run(() => Program.Log($"Module {name} has already been registered. Did you forget to namespace your modules name. (ex: yourname:modulename)", LogSeverity.Warning));
                             break;
                         case RegistrationState.MissingDependencies:
 
@@ -123,7 +123,7 @@ namespace DragonBot.Core
     [Serializable]
     internal class ModuleRegistrationExeption : Exception
     {
-        public bool Fatal { get; private set; }
+        public bool Fatal { get; }
         private ModuleRegistrationExeption()
         {
         }
