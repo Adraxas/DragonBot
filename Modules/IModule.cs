@@ -1,11 +1,8 @@
 ﻿namespace DragonBot.Modules
 {
-    public interface IModule
+    public interface IModule<T>
     {
-        public static abstract void Register();
-    }
-    internal interface ICoreModule : IModule
-    {
-        internal const bool IsCore = true;
+        public abstract static string Name { get; }
+        public static abstract T Create();
     }
 }
