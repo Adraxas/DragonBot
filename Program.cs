@@ -17,7 +17,6 @@ namespace DragonBot
             {
                 Environment.Exit(0);
             }
-            await RegisterModuleAttribute.RegisterModulesAsync();
             await Run();
             await Task.Delay(-1);
         }
@@ -25,7 +24,7 @@ namespace DragonBot
         internal static void Init()
         {
             string DefaultBaseDir = AppContext.BaseDirectory;
-#if DEsBUG
+#if DEBUG
             File.Delete($"{DefaultBaseDir}/settings.json");
             Directory.Delete($"{DefaultBaseDir}/logs", true);
             Directory.Delete($"{DefaultBaseDir}/instances", true);
@@ -43,7 +42,8 @@ namespace DragonBot
                 w.Write(JsonSerializer.Serialize(Settings));
             }
             Directory.CreateDirectory(Settings.InstanceConfigsDir);
-            ModuleInitilaizer.Patch();
+            //ModuleInitilaizer.Patch();
+            RegisterModuleAttribute.RegisterModules();
         }
         private static async Task Run()
         {
@@ -70,7 +70,7 @@ namespace DragonBot
         internal static async Task Log(string message, LogSeverity severity)
         {
             Directory.CreateDirectory(Settings!.LogDir);
-            await using StreamWriter outputFile = new(Path.Combine(Settings!.LogDir, "latest.log"));
+            await using StreamWriter outputFile = new(Path.Combine(Settings!.LogDir, "latest.internal.log"));
             await outputFile.WriteAsync($"{DateTime.Now} {severity}:{message}");
             await Task.CompletedTask;
         }
@@ -79,9 +79,9 @@ namespace DragonBot
             [property: JsonPropertyName("baseDirectory")]
             internal required string BaseDir { get; init; }
             [property: JsonPropertyName("logDirectory")]
-            internal string LogDir { get => field ??= $"{BaseDir}/logs"; init; }
+            internal string LogDir { get => field ??= $"{BaseDir}logs"; init; }
             [property: JsonPropertyName("instanceConfigsDirectory")]
-            internal string InstanceConfigsDir { get => field ??= $"{BaseDir}/instances"; init; }
+            internal string InstanceConfigsDir { get => field ??= $"{BaseDir}instances"; init; }
         }
     }
 }

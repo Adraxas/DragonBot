@@ -1,11 +1,8 @@
-﻿using DragonBot.Core;
-using System.Runtime.CompilerServices;
-
-namespace DragonBot.Modules
+﻿namespace DragonBot.Modules
 {
     public interface IModule
     {
-        public static abstract Task Register();
+        public static abstract void Register();
     }
     internal interface ICoreModule : IModule
     {

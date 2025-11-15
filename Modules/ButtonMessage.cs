@@ -1,23 +1,18 @@
 ﻿using Discord;
 using DragonBot.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using Nito.AsyncEx;
 
 namespace DragonBot.Modules
 {
     [RegisterModule]
     internal class ButtonMessage : ModuleBase, ICoreModule
     {
-        const string Name = "ButtonMessage";
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1213:Remove unused member declaration", Justification = "Member is accessed via reflection")]
+        const string Name = "Core:ButtonMessage";
 
-        public static async new Task Register()
+        public static new void Register()
         {
-            await Program.Log("Derived", LogSeverity.Debug);
+            AsyncContext.Run(() => Program.Log("Derived", LogSeverity.Debug));
         }
         internal static ButtonMessage Create()
         {

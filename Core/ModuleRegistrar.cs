@@ -1,6 +1,7 @@
 ﻿using Discord;
 using DragonBot.Modules;
 using HarmonyLib;
+using Nito.AsyncEx;
 using System.Reflection;
 
 
@@ -8,71 +9,87 @@ namespace DragonBot.Core
 {
     internal static class ModuleRegistrar
     {
-        private static readonly Dictionary<string, System.Delegate> CoreModules = [];
         private static readonly Dictionary<string, System.Delegate> Modules = [];
-        public static async Task<RegistrationState> Register(string name, Delegate? module)
+        internal static async Task<RegistrationState> Register(string name, Delegate module)
         {
-            bool Core = default;
-            if (CoreModules.ContainsKey(name))
+            if (Modules.ContainsKey(name))
             {
                 return RegistrationState.AlreadyRegistered;
             }
             try
             {
-                Core = module!.GetMethodInfo().DeclaringType?.GetField("IsCore")?.GetValue(null) is true;
-                if (Core)
-                {
-                    CoreModules.Add(name, module!);
-                }
-                else
-                {
-                    Modules.Add(name, module!);
-                }
+                Type moduleClassType = module.GetMethodInfo().DeclaringType ?? throw new ModuleRegistrationExeption("Error getting declaring type of module.", true);
+                var dependecies = AccessTools.DeclaredField(moduleClassType, "Dependecies");
+                await Program.Log($"Sucessfully registered module {name}.", LogSeverity.Info);
                 return RegistrationState.Success;
             }
             catch (Exception ex)
             {
-                if (Core)
+                if (ex is ModuleRegistrationExeption)
+                {
+                    if (((ModuleRegistrationExeption)ex).Fatal)
+                    {
+                        await Program.Log($"ModuleRegistrationExeption thrown in registration {name} with reason {ex.Message}. This is a fatal error and should never happen. Program will now exit.", LogSeverity.Critical);
+                        Environment.Exit(-1);
+                    }
+                    await Program.Log($"ModuleRegistrationExeption thrown in registration {name} with reason {ex.Message}.", LogSeverity.Error);
+                }
+                else if (name.StartsWith("Core:"))
                 {
                     await Program.Log($"Exeption {ex} thrown in registration for core module {name}. This is a fatal error and should never happen. Program will now exit.", LogSeverity.Critical);
                     Environment.Exit(-1);
                 }
                 else
                 {
-                    await Program.Log($"Exeption {ex} thrown in module registration for {name}.", LogSeverity.Error);
+                    await Program.Log($"Exeption {ex} thrown in registration for module {name}.", LogSeverity.Error);
                 }
                 return RegistrationState.ErrorThrown;
             }
         }
     }
-    
     public enum RegistrationState
     {
         Success,
         ErrorThrown,
-        AlreadyRegistered
+        AlreadyRegistered,
+        MissingDependencies
     }
     [AttributeUsage(AttributeTargets.Class)]
     public class RegisterModuleAttribute : Attribute
     {
-        public static async Task RegisterModulesAsync()
+        public static void RegisterModules()
         {
             var targets = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
-                .Where(x => x.IsClass && x.IsSubclassOf(typeof(MethodBase)) && x.GetCustomAttributes(typeof(RegisterModuleAttribute), false).Length != 0);
+                .Where(x => x.IsClass && x.IsSubclassOf(typeof(ModuleBase)) && typeof(IModule).IsAssignableFrom(x) && x.GetCustomAttributes(typeof(RegisterModuleAttribute), false).Length != 0);
 
             foreach (var target in targets)
             {
-                var method = AccessTools.DeclaredMethod(target, "Register");
-                if(method != null)
+                var name = AccessTools.DeclaredField(target, "Name").GetValue(null) as string;
+                var createMethod = Delegate.CreateDelegate(target, AccessTools.DeclaredMethod("Create"));
+                if(name is null || createMethod is null)
                 {
-                    var result = method.Invoke(null, null);
-                    if(result is Task task)
-                    {
-                        await task;
-                    }
+                    AsyncContext.Run(() => Program.Log($"Invalid Module (Name:{name} createMethod:{createMethod}).", LogSeverity.Error));
                 }
-                //await target.DeclaredMethod("Register").Invoke(null, null);
+                else
+                {
+                    switch (AsyncContext.Run(() => ModuleRegistrar.Register(name, createMethod)))
+                    {
+                        case RegistrationState.Success:
+                            break;
+                        case RegistrationState.ErrorThrown:
+                            break;
+                        case RegistrationState.AlreadyRegistered:
+                            AsyncContext.Run(() => Program.Log($"Module {name} has already been registered. Did you forget to namespace your modules name. (ex: yourname:modulename)", LogSeverity.Error));
+                            break;
+                        case RegistrationState.MissingDependencies:
+
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
+                    
+                }
             }
         }
         /*private async void test()
@@ -88,7 +105,7 @@ namespace DragonBot.Core
             }
         }*/
     }
-    [HarmonyPatch(typeof(ModuleBase))]
+    /*[HarmonyPatch(typeof(ModuleBase))]
     [HarmonyPatch(nameof(ModuleBase.Register))]
     internal class ModuleInitilaizer()
     {
@@ -99,7 +116,30 @@ namespace DragonBot.Core
         }
         internal static void Prefix(ModuleBase __originalMethod)
         {
-            _ = Program.Log("HarmonyPatch", LogSeverity.Debug);
+            //Program.Log("HarmonyPatch", LogSeverity.Debug);
+            AsyncContext.Run(() => Program.Log("HarmonyPatch", LogSeverity.Debug));
+        }
+    }*/
+    [Serializable]
+    internal class ModuleRegistrationExeption : Exception
+    {
+        public bool Fatal { get; private set; }
+        private ModuleRegistrationExeption()
+        {
+        }
+        public ModuleRegistrationExeption(string? message) : base(message)
+        {
+        }
+        public ModuleRegistrationExeption(string? message, bool fatal) : base(message)
+        {
+            Fatal = fatal;
+        }
+        public ModuleRegistrationExeption(string? message, Exception? innerException) : base(message, innerException)
+        {
+        }
+        public ModuleRegistrationExeption(string? message, Exception? innerException, bool fatal) : base(message, innerException)
+        {
+            Fatal = fatal;
         }
     }
 }

@@ -1,21 +1,11 @@
-﻿using Discord;
-using DragonBot.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DragonBot.Modules
+﻿namespace DragonBot.Modules
 {
     internal abstract class ModuleBase
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1213:Remove unused member declaration", Justification = "Member is accessed via reflection")]
         const string Name = "ModuleBase";
-        public static async void Register()
+        public static void Register()
         {
-            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }
