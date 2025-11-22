@@ -25,9 +25,9 @@ namespace DragonBot.Core
             }
             catch (Exception ex)
             {
-                if (ex is ModuleRegistrationExeption)
+                if (ex is ModuleRegistrationExeption exeption)
                 {
-                    if (((ModuleRegistrationExeption)ex).Fatal)
+                    if (exeption.Fatal)
                     {
                         await Program.Log($"ModuleRegistrationExeption thrown in registration of module {name} with reason {ex.Message}. This is a fatal error and should never happen. Program will now exit.", LogSeverity.Critical);
                         Environment.Exit(-1);
@@ -45,6 +45,10 @@ namespace DragonBot.Core
                 }
                 return RegistrationState.ErrorThrown;
             }
+        }
+        internal static async Task GetRequestedModules()
+        {
+            return;
         }
     }
     public enum RegistrationState

@@ -1,8 +1,10 @@
-﻿namespace DragonBot.Modules
+﻿using DragonBot.Instance;
+
+namespace DragonBot.Modules
 {
     public interface IModule<T>
     {
         public abstract static string Name { get; }
-        public static abstract T Create();
+        public abstract static T Create(Bot bot);
     }
 }

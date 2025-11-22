@@ -1,18 +1,21 @@
 ﻿using Discord;
 using DragonBot.Core;
+using DragonBot.Instance;
 using Nito.AsyncEx;
 
 namespace DragonBot.Modules
 {
     [RegisterModule]
-    internal class ButtonMessage : ModuleBase, IModule<ButtonMessage>
+    internal sealed class ButtonMessage : ModuleBase, IModule<ButtonMessage>
     {
         public static string Name { get; } = "Core:ButtonMessage";
 
-        public static ButtonMessage Create()
+        public static ButtonMessage Create(Bot bot)
         {
-            AsyncContext.Run(() => Program.Log("Derived", LogSeverity.Debug));
-            return new ButtonMessage();
+            return new ButtonMessage(bot);
+        }
+        private ButtonMessage(Bot bot) : base(bot)
+        {
         }
     }
 }
