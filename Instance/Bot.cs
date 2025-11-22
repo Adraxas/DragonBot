@@ -3,6 +3,8 @@ using static DragonBot.Program;
 using Discord.WebSocket;
 using Discord;
 using System.Text.Json.Serialization;
+using DragonBot.Core;
+
 
 
 
@@ -13,10 +15,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace DragonBot.Instance
 {
-    internal sealed class Bot
+    public sealed class Bot
     {
-        internal readonly BotConfig botConfig;
-        private readonly DiscordSocketClient client = new();
+        public BotConfig BotConfig { get; init; }
+        public DiscordSocketClient Client { get; } = new();
+        public MicroBus Bus { get; } = new();
         private Bot(string botName, string? token)
         {
             string DefaultToken = "";
@@ -26,28 +29,31 @@ namespace DragonBot.Instance
             .Build();
             DefaultToken = config.GetSection("BotToken").Value!;
 #endif
-            if (File.Exists($"{Settings!.InstanceConfigsDir}/{botName}.json"))
+            if (File.Exists(Path.Combine(Settings!.InstanceConfigDir, botName, ".json")))
             {
-                using StreamReader r = new($"{Settings!.InstanceConfigsDir}/{botName}.json");
+                using StreamReader r = new(Path.Combine(Settings!.InstanceConfigDir, botName, ".json"));
                 string json = r.ReadToEnd();
-                botConfig = JsonSerializer.Deserialize<BotConfig>(json) ?? new();
+                BotConfig = JsonSerializer.Deserialize<BotConfig>(json) ?? new();
             }
             else
             {
-                botConfig = new() { Token = token ?? DefaultToken};
-                using StreamWriter w = new($"{Settings!.InstanceConfigsDir}/{botName}.json");
-                w.Write(JsonSerializer.Serialize(botConfig));
+                BotConfig = new() { Token = token ?? DefaultToken};
+                using StreamWriter w = new(Path.Combine(Settings!.InstanceConfigDir, botName, ".json"));
+                w.Write(JsonSerializer.Serialize(BotConfig));
             }
         }
         internal static async Task<Bot> Create(string botName, string? token = null)
         {
             Bot bot = new(botName, token);
-            bot.client.Log += Log;
-            await bot.client.LoginAsync(TokenType.Bot, bot.botConfig.Token);
-            await bot.client.StartAsync();
+            bot.Client.Log += Log;
+            await bot.Client.LoginAsync(TokenType.Bot, bot.BotConfig.Token);
+            await bot.Client.StartAsync();
             return bot;
         }
-        
     }
-    internal record BotConfig([property: JsonPropertyName("loggingEnabled")] bool Logging = true, [property: JsonPropertyName("DiscordToken")] string? Token = null);
+    public record BotConfig([property: JsonPropertyName("LoggingEnabled")] bool Logging = true, [property: JsonPropertyName("GuildID")] ulong GuildID = 0, [property: JsonPropertyName("DiscordToken")] string? Token = null)
+    {
+        [property: JsonPropertyName("ModuleConfigs")]
+        Dictionary<string, object> Configs { get; } = [];
+    };
 }
