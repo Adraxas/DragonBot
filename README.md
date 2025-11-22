@@ -1,1 +1,2 @@
 # DragonBot
+All Rights Reserved
