@@ -25,29 +25,29 @@ namespace DragonBot
         {
             string DefaultBaseDir = AppContext.BaseDirectory;
 #if DEBUG
-            File.Delete($"{DefaultBaseDir}/settings.json");
-            Directory.Delete($"{DefaultBaseDir}/logs", true);
-            Directory.Delete($"{DefaultBaseDir}/instances", true);
+            File.Delete(Path.Combine(DefaultBaseDir, "settings.json"));
+            Directory.Delete(Path.Combine(DefaultBaseDir, "logs"), true);
+            Directory.Delete(Path.Combine(DefaultBaseDir, "instances"), true);
 #endif
-            if (File.Exists($"{DefaultBaseDir}/settings.json"))
+            if (File.Exists(Path.Combine(DefaultBaseDir, "settings.json")))
             {
-                using StreamReader r = new($"{DefaultBaseDir}/settings.json");
+                using StreamReader r = new(Path.Combine(DefaultBaseDir, "settings.json"));
                 string json = r.ReadToEnd();
                 Settings = JsonSerializer.Deserialize<GlobalSettings>(json) ?? new() { BaseDir = DefaultBaseDir };
             }
             else
             {
                 Settings = new() { BaseDir = DefaultBaseDir };
-                using StreamWriter w = new($"{AppContext.BaseDirectory}/settings.json");
+                using StreamWriter w = new(Path.Combine(AppContext.BaseDirectory, "settings.json"));
                 w.Write(JsonSerializer.Serialize(Settings));
             }
-            Directory.CreateDirectory(Settings.InstanceConfigsDir);
+            Directory.CreateDirectory(Settings.InstanceConfigDir);
             //ModuleInitilaizer.Patch();
             RegisterModuleAttribute.RegisterModules();
         }
         private static async Task Run()
         {
-            var configs = Directory.EnumerateFiles(Settings!.InstanceConfigsDir);
+            var configs = Directory.EnumerateFiles(Settings!.InstanceConfigDir);
             if (configs.Any())
             {
                 foreach (var config in configs)
@@ -79,9 +79,9 @@ namespace DragonBot
             [property: JsonPropertyName("baseDirectory")]
             internal required string BaseDir { get; init; }
             [property: JsonPropertyName("logDirectory")]
-            internal string LogDir { get => field ??= $"{BaseDir}logs"; init; }
+            internal string LogDir { get => field ??= Path.Combine(BaseDir, "logs"); init; }
             [property: JsonPropertyName("instanceConfigsDirectory")]
-            internal string InstanceConfigsDir { get => field ??= $"{BaseDir}instances"; init; }
+            internal string InstanceConfigDir { get => field ??= Path.Combine(BaseDir, "instances"); init; }
         }
     }
 }
