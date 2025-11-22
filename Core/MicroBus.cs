@@ -18,7 +18,7 @@
         }
         public bool AsyncUnsubscribe(string topic)
         {
-            return Handlers.Remove(topic);
+            return AsyncHandlers.Remove(topic);
         }
         public async Task<bool> Publish<T>(IBusMessage<T> message)
         {
