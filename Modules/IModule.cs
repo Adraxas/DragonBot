@@ -6,5 +6,6 @@ namespace DragonBot.Modules
     {
         public abstract static string Name { get; }
         public abstract static T Create(Bot bot);
+        public void RegisterCommands();
     }
 }
