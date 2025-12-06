@@ -50,12 +50,20 @@ namespace DragonBot.Instance
             bot.Client.Log += Log;
             await bot.Client.LoginAsync(TokenType.Bot, bot.BotConfig.Token);
             await bot.Client.StartAsync();
+            bot.Client.Ready += bot.Ready;
             return bot;
         }
+        public async Task Ready()
+        {
+            BotConfig.GuildId = Client.Guilds.FirstOrDefault()?.Id ?? 0;
+            Util.InitializeModules(this);
+        }
     }
-    public record BotConfig([property: JsonPropertyName("LoggingEnabled")] bool Logging = true, [property: JsonPropertyName("GuildID")] ulong GuildID = 0, [property: JsonPropertyName("DiscordToken")] string? Token = null)
+    public record BotConfig([property: JsonPropertyName("LoggingEnabled")] bool Logging = true, [property: JsonPropertyName("DiscordToken")] string? Token = null)
     {
         [property: JsonPropertyName("ModuleConfigs")]
-        Dictionary<string, object> Configs { get; } = [];
-    };
+        public Dictionary<string, object> Configs { get; } = [];
+        [property: JsonPropertyName("GuildID")]
+        public ulong GuildId { get; set => field = (field == 0 ? value : field); } //this feels gross
+    }
 }
