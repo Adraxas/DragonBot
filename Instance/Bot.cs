@@ -20,6 +20,7 @@ namespace DragonBot.Instance
         public BotConfig BotConfig { get; init; }
         public DiscordSocketClient Client { get; } = new();
         public MicroBus Bus { get; } = new();
+        public Util Util { get; init; }
         private Bot(string botName, string? token)
         {
             string DefaultToken = "";
@@ -41,6 +42,7 @@ namespace DragonBot.Instance
                 using StreamWriter w = new(Path.Combine(Settings!.InstanceConfigDir, botName, ".json"));
                 w.Write(JsonSerializer.Serialize(BotConfig));
             }
+            Util = new(this);
         }
         internal static async Task<Bot> Create(string botName, string? token = null)
         {
