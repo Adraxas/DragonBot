@@ -25,9 +25,9 @@ namespace DragonBot.Modules
         {
             await User.RemoveRoleAsync(role);
         }
-        public async Task<bool> HasRole(ulong UserID, IRole role)
+        public async Task<bool> HasRole(ulong UserId, IRole role)
         {
-            //var user = bot.Client.GetGuild(bot.BotConfig.GuildID).GetUser(UserID);
+            //var user = bot.Client.GetGuild(bot.BotConfig.GuildId).GetUser(UserId);
             //return user.Roles.Contains(role);
             return false;
         }
