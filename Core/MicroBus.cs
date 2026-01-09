@@ -1,4 +1,6 @@
-﻿namespace DragonBot.Core
+﻿using System.Collections;
+
+namespace DragonBot.Core
 {
     public class MicroBus
     {
@@ -20,7 +22,7 @@
         {
             return AsyncHandlers.Remove(topic);
         }
-        public async Task<bool> Publish<T>(IBusMessage<T> message)
+        public bool Publish<T>(IBusMessage<T> message)
         {
             if (Handlers.TryGetValue(message.Topic, out (Type, Action<IBusMessage<object>>) value))
             {
@@ -30,7 +32,6 @@
                     ((Action<IBusMessage<T>>)action)(message);
                     return true;
                 }
-                return false;
             }
             return false;
         }
@@ -44,7 +45,6 @@
                     await ((Func<IBusMessage<T>, Task>)action)(message);
                     return true;
                 }
-                return false;
             }
             return false;
         }

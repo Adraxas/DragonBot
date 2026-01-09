@@ -16,6 +16,7 @@ namespace DragonBot.Modules
         }
         private RoleManager(Bot bot) : base(bot)
         {
+
         }
         public async Task AddRole(IGuildUser User, IRole role)
         {
@@ -27,9 +28,9 @@ namespace DragonBot.Modules
         }
         public async Task<bool> HasRole(ulong UserId, IRole role)
         {
-            //var user = bot.Client.GetGuild(bot.BotConfig.GuildId).GetUser(UserId);
-            //return user.Roles.Contains(role);
-            return false;
+            var user = bot.Client.GetGuild(bot.BotConfig.GuildId).GetUser(UserId);
+            return user.Roles.Contains(role);
+            //return false;
         }
     }
 }

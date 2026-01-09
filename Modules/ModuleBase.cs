@@ -8,11 +8,11 @@ namespace DragonBot.Modules
         protected ModuleBase(Bot bot)
         {
             this.bot = bot;
-            RegisterCommands();
         }
         public virtual void RegisterCommands()
         {
             // Override in derived classes to register commands
+            throw new NotImplementedException("Do not call base method");
         }
     }
 }
