@@ -23,7 +23,7 @@ namespace DragonBot.Instance
         public Util Util { get; init; }
         private Bot(string botName, string? token)
         {
-            string DefaultToken = "";
+            string DefaultToken = string.Empty;
 #if DEBUG
             IConfigurationRoot config = new ConfigurationBuilder()
             .AddUserSecrets<Bot>()
