@@ -9,7 +9,7 @@ namespace DragonBot.Core
 {
     internal static class ModuleRegistrar
     {
-        private static readonly Dictionary<string, System.Delegate> Modules = [];
+        private static readonly Dictionary<string, Delegate> Modules = [];
         internal static async Task<RegistrationState> Register(string name, Delegate module)
         {
             if (Modules.ContainsKey(name))
@@ -18,7 +18,7 @@ namespace DragonBot.Core
             }
             try
             {
-                Type moduleClassType = module.GetMethodInfo().DeclaringType ?? throw new ModuleRegistrationExeption("Error getting declaring type of module.", true);
+                Type moduleClassType = module.GetMethodInfo().DeclaringType ?? throw new ModuleRegistrationExeption("Error getting declared type of module.", true);
                 var dependecies = AccessTools.DeclaredField(moduleClassType, "Dependecies");
                 await Program.Log($"Sucessfully registered module {name}.", LogSeverity.Info);
                 return RegistrationState.Success;
