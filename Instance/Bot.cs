@@ -20,14 +20,15 @@ namespace DragonBot.Instance
         public BotConfig BotConfig { get; init; }
         public DiscordSocketClient Client { get; } = new();
         public MicroBus Bus { get; } = new();
+        public RoleManager RoleManager { get; init; }
         public Util Util { get; init; }
         private Bot(string botName, string? token)
         {
             string DefaultToken = string.Empty;
 #if DEBUG
             IConfigurationRoot config = new ConfigurationBuilder()
-            .AddUserSecrets<Bot>()
-            .Build();
+                .AddUserSecrets<Bot>()
+                .Build();
             DefaultToken = config.GetSection("BotToken").Value!;
 #endif
             if (File.Exists(Path.Combine(Settings!.InstanceConfigDir, botName, ".json")))
@@ -42,6 +43,7 @@ namespace DragonBot.Instance
                 using StreamWriter w = new(Path.Combine(Settings!.InstanceConfigDir, botName, ".json"));
                 w.Write(JsonSerializer.Serialize(BotConfig));
             }
+            RoleManager = new(this);
             Util = new(this);
         }
         internal static async Task<Bot> Create(string botName, string? token = null)
