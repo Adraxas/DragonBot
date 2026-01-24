@@ -20,6 +20,7 @@ namespace DragonBot.Instance
         public MicroBus Bus { get; } = new();
         public RoleManager RoleManager { get; init; }
         public Util Util { get; init; }
+        public Dictionary<string, ModuleBase> LoadedModules { get; }
         private Bot(string botName, string? token)
         {
             string DefaultToken = string.Empty;
@@ -43,6 +44,8 @@ namespace DragonBot.Instance
             }
             RoleManager = new(this);
             Util = new(this);
+            LoadedModules = ModuleRegistrar.GetRequestedModules(this, BotConfig.EnabledModules);
+
         }
         internal static async Task<Bot> Create(string botName, string? token = null)
         {

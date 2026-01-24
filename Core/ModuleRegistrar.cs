@@ -1,4 +1,5 @@
 ﻿using Discord;
+using DragonBot.Instance;
 using DragonBot.Modules;
 using Nito.AsyncEx;
 using System.Reflection;
@@ -20,6 +21,7 @@ namespace DragonBot.Core
             {
                 Type moduleClassType = module.GetMethodInfo().DeclaringType ?? throw new ModuleRegistrationExeption("Error getting declared type of module.", true);
                 //var dependecies = moduleClassType.GetProperty("Dependecies")!.GetValue(null); //add null check
+                Modules.Add(name, module);
                 await Program.Log($"Sucessfully registered module {name}.", LogSeverity.Info);
                 return RegistrationState.Success;
             }
@@ -46,9 +48,44 @@ namespace DragonBot.Core
                 return RegistrationState.ErrorThrown;
             }
         }
-        internal static async Task GetRequestedModules()
+        internal static Dictionary<string, ModuleBase> GetRequestedModules(Bot bot, List<string> requestedModules)
         {
-            return;
+            return Modules
+                .Where(x => requestedModules.Contains(x.Key))
+                .ToDictionary(x => x.Key, x => x.Value.Invoke(bot));
+        }
+        internal static void InitializeModules(Dictionary<string, ModuleBase> LoadedModules)
+        {
+            foreach (var loadedModule in LoadedModules)
+            {
+                var moduleInstance = loadedModule.Value;
+                if (moduleInstance is null) continue;
+
+                var moduleType = moduleInstance.GetType();
+
+                // Find initializers registered for this exact type or any base/interface type.
+                var matchedInitializers = Initializers
+                    .Where(kv => kv.Key.IsAssignableFrom(moduleType))
+                    .Select(kv => kv.Value)
+                    .ToList();
+
+                if (matchedInitializers.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (var initializer in matchedInitializers)
+                {
+                    try
+                    {
+                        initializer?.Invoke(moduleInstance);
+                    }
+                    catch (Exception ex)
+                    {
+                        AsyncContext.Run(() => Program.Log($"Exception initializing module {loadedModule.Key} ({moduleType.FullName}): {ex}", LogSeverity.Error));
+                    }
+                }
+            }
         }
     }
     public enum RegistrationState
