@@ -18,7 +18,7 @@ namespace DragonBot.Core
             try
             {
                 Type moduleClassType = module.GetMethodInfo().DeclaringType ?? throw new ModuleRegistrationExeption("Error getting declared type of module.", true);
-                var dependecies = AccessTools.DeclaredField(moduleClassType, "Dependecies");
+                //var dependecies = moduleClassType.GetProperty("Dependecies")!.GetValue(null); //add null check
                 await Program.Log($"Sucessfully registered module {name}.", LogSeverity.Info);
                 return RegistrationState.Success;
             }
@@ -68,7 +68,7 @@ namespace DragonBot.Core
 
             foreach (var target in targets)
             {
-                var name = AccessTools.DeclaredField(target, "Name").GetValue(null) as string;
+                var name = target.GetProperty("Name")!.GetValue(null) as string;
                 var createMethod = Delegate.CreateDelegate(target, AccessTools.DeclaredMethod("Create"));
                 if(name is null || createMethod is null)
                 {
