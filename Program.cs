@@ -92,5 +92,13 @@ namespace DragonBot
             [property: JsonPropertyName("instanceConfigsDirectory")]
             internal string InstanceConfigDir { get => field ??= Path.Combine(BaseDir, "instances"); init; }
         }
+        extension<TKey, TValue>(Dictionary<TKey, TValue> dest)
+            where TKey : notnull
+        {
+            public Dictionary<TKey, TValue> Merge(Dictionary<TKey, TValue> source) =>
+                dest.Concat(source)
+                    .GroupBy(kvp => kvp.Key)
+                    .ToDictionary(group => group.Key, group => group.Last().Value);
+        }
     }
 }
