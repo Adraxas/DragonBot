@@ -53,6 +53,8 @@ namespace DragonBot
             Directory.CreateDirectory(Settings.InstanceConfigDir);
             //ModuleInitilaizer.Patch();
             RegisterModuleAttribute.RegisterModules();
+            //TEMP HACK TO LOAD MODULES
+            ModuleMain.InitAssembly();
         }
         private static async Task Run()
         {
