@@ -24,11 +24,20 @@ namespace DragonBot
         internal static void Init()
         {
             string DefaultBaseDir = AppContext.BaseDirectory;
-#if DEBUG
+/*#if DEBUG
+            if (Directory.Exists(Path.Combine(DefaultBaseDir, "instances")))
+            {
+                Directory.Delete(Path.Combine(DefaultBaseDir, "instances"), true);
+            }
+            if (Directory.Exists(Path.Combine(DefaultBaseDir, "logs")))
+            {
+                Directory.Delete(Path.Combine(DefaultBaseDir, "logs"), true);
+            }
+            if (File.Exists(Path.Combine(DefaultBaseDir, "settings.json")))
+            {
             File.Delete(Path.Combine(DefaultBaseDir, "settings.json"));
-            Directory.Delete(Path.Combine(DefaultBaseDir, "logs"), true);
-            Directory.Delete(Path.Combine(DefaultBaseDir, "instances"), true);
-#endif
+            }
+#endif*/
             if (File.Exists(Path.Combine(DefaultBaseDir, "settings.json")))
             {
                 using StreamReader r = new(Path.Combine(DefaultBaseDir, "settings.json"));
@@ -77,7 +86,7 @@ namespace DragonBot
         internal record GlobalSettings([property: JsonPropertyName("singleInstance")] bool SingleInstance = true)
         {
             [property: JsonPropertyName("baseDirectory")]
-            internal required string BaseDir { get; init; }
+            internal required string BaseDir { get; init; } = AppContext.BaseDirectory;
             [property: JsonPropertyName("logDirectory")]
             internal string LogDir { get => field ??= Path.Combine(BaseDir, "logs"); init; }
             [property: JsonPropertyName("instanceConfigsDirectory")]
