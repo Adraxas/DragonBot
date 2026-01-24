@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Discord;
 using System.Text.Json.Serialization;
 using DragonBot.Core;
+using DragonBot.Modules;
 
 
 
@@ -34,13 +35,12 @@ namespace DragonBot.Instance
             {
                 using StreamReader r = new(Path.Combine(Settings!.InstanceConfigDir, botName, ".json"));
                 string json = r.ReadToEnd();
-                BotConfig = JsonSerializer.Deserialize<BotConfig>(json) ?? new();
+                BotConfig = JsonSerializer.Deserialize<BotConfig>(json)!;
             }
             else
             {
                 BotConfig = new() { Token = token ?? DefaultToken};
-                using StreamWriter w = new(Path.Combine(Settings!.InstanceConfigDir, botName, ".json"));
-                w.Write(JsonSerializer.Serialize(BotConfig));
+                SaveConfig();
             }
             RoleManager = new(this);
             Util = new(this);
@@ -58,15 +58,29 @@ namespace DragonBot.Instance
         }
         public async Task Ready()
         {
-            BotConfig.GuildId = Client.Guilds.FirstOrDefault()?.Id ?? 0;
-            Util.InitializeModules(this);
+            if (BotConfig.GuildId is 0)
+            {
+                BotConfig.GuildId = Client.Guilds.FirstOrDefault()?.Id ?? 0;
+                SaveConfig();
+            }
+            ModuleRegistrar.InitializeModules(LoadedModules);
+        }
+        public void SaveConfig()
+        {
+            string path = Path.Combine(Settings!.InstanceConfigDir, $"{BotConfig.BotName}.json");
+            using StreamWriter w = new(path);
+            w.Write(JsonSerializer.Serialize(BotConfig));
         }
     }
     public record BotConfig([property: JsonPropertyName("LoggingEnabled")] bool Logging = true, [property: JsonPropertyName("DiscordToken")] string? Token = null)
     {
+        [property: JsonPropertyName("BotName")]
+        public string BotName { get => field ??= "DragonBot"; }
+        [property: JsonPropertyName("EnabledModules")]
+        public List<string> EnabledModules { get; } = ["Core:RoleButtonMessage"];
         [property: JsonPropertyName("ModuleConfigs")]
         public Dictionary<string, object> Configs { get; } = [];
         [property: JsonPropertyName("GuildID")]
-        public ulong GuildId { get; set => field = (field == 0 ? value : field); } //this feels gross
+        public ulong GuildId { get; internal set; }
     }
 }
