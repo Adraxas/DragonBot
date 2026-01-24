@@ -8,8 +8,9 @@ namespace DragonBot.Core
 {
     internal static class ModuleRegistrar
     {
-        private static readonly Dictionary<string, Delegate> Modules = [];
-        internal static async Task<RegistrationState> Register(string name, Delegate module)
+        private static readonly Dictionary<string, Func<Bot, ModuleBase>> Modules = [];
+        public static Dictionary<Type, Action<object>> Initializers = [];
+        internal static async Task<RegistrationState> Register(string name, Func<Bot, ModuleBase> module)
         {
             if (Modules.ContainsKey(name))
             {
@@ -69,7 +70,7 @@ namespace DragonBot.Core
             foreach (var target in targets)
             {
                 var name = target.GetProperty("Name")!.GetValue(null) as string;
-                var createMethod = Delegate.CreateDelegate(target, AccessTools.DeclaredMethod("Create"));
+                var createMethod = (Func<Bot, ModuleBase>)Delegate.CreateDelegate(typeof(Func<Bot, ModuleBase>), target.GetMethod("Create")!);
                 if(name is null || createMethod is null)
                 {
                     AsyncContext.Run(() => Program.Log($"Invalid Module (Name:{name} createMethod:{createMethod}).", LogSeverity.Error));
