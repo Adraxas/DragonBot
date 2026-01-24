@@ -65,7 +65,7 @@ namespace DragonBot.Core
         {
             var targets = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
-                .Where(x => x.IsClass && x.IsSubclassOf(typeof(ModuleBase)) && typeof(IModule<>).IsAssignableFrom(x) && x.GetCustomAttributes(typeof(RegisterModuleAttribute), false).Length != 0);
+                .Where(x => x.IsClass && x.IsSubclassOf(typeof(ModuleBase)) && x.GetCustomAttributes(typeof(RegisterModuleAttribute), false).Length != 0);
 
             foreach (var target in targets)
             {
