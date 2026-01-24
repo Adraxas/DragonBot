@@ -1,6 +1,7 @@
 ﻿using Discord;
 using DragonBot.Core;
 using DragonBot.Instance;
+using DragonBot.Modules;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -35,7 +36,7 @@ namespace DragonBot
             }
             if (File.Exists(Path.Combine(DefaultBaseDir, "settings.json")))
             {
-            File.Delete(Path.Combine(DefaultBaseDir, "settings.json"));
+                File.Delete(Path.Combine(DefaultBaseDir, "settings.json"));
             }
 #endif*/
             if (File.Exists(Path.Combine(DefaultBaseDir, "settings.json")))
