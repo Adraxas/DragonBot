@@ -1,6 +1,5 @@
 ﻿using Discord;
 using DragonBot.Modules;
-using HarmonyLib;
 using Nito.AsyncEx;
 using System.Reflection;
 

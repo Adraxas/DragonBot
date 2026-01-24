@@ -7,8 +7,6 @@ using DragonBot.Core;
 
 
 
-
-
 #if DEBUG
 using Microsoft.Extensions.Configuration;
 #endif

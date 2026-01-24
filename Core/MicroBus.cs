@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace DragonBot.Core
+﻿namespace DragonBot.Core
 {
     public class MicroBus
     {

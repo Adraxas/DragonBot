@@ -3,8 +3,6 @@ using Discord.Net;
 using Discord.WebSocket;
 using DragonBot.Core;
 using DragonBot.Instance;
-using Nito.AsyncEx;
-using System;
 using System.Text.Json;
 
 namespace DragonBot.Modules

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DragonBot.Instance
+﻿namespace DragonBot.Instance
 {
     public class Util
     {
@@ -15,11 +11,6 @@ namespace DragonBot.Instance
         {
             return bot.Client.GetGuild(bot.BotConfig.GuildId).GetApplicationCommandsAsync().Result
                 .Any(cmd => cmd.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        internal void InitializeModules(Bot bot)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using DragonBot.Core;
-using Nito.AsyncEx;
 
 namespace DragonBot.Instance
 {
