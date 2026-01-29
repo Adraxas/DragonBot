@@ -20,6 +20,10 @@ namespace DragonBot.Modules
         private RoleButtonMessage(Bot bot) : base(bot)
         {
             bot.Client.SlashCommandExecuted += HandleCommands;
+            if (bot.BotConfig.ModuleConfigs.TryGetValue(Name, out var obj) && obj is Dictionary<string, RoleButtonMessageConfig> configs)
+            {
+                MessageConfigs = configs;
+        }
         }
         public async void RegisterCommands()
         {
@@ -108,6 +112,7 @@ namespace DragonBot.Modules
                     configKey = message.Id.ToString();
                 }
                 MessageConfigs.Add(configKey!, new RoleButtonMessageConfig(message.Id, channel.Id, options.ElementAt(1).Value.ToString() ?? string.Empty, []));
+                bot.SaveConfig();
             }
             else if (commandName is "add-button" or "remove-button")
             {
@@ -152,6 +157,12 @@ namespace DragonBot.Modules
                 {
                     await userMessage.ModifyAsync(msg => msg.Components = builder.Build());
                 }
+                if (!bot.BotConfig.ModuleConfigs.TryAdd(Name, MessageConfigs))
+                {
+                    bot.BotConfig.ModuleConfigs.TryGetValue(Name, out var ModuleConfig);
+                    ModuleConfig = MessageConfigs;
+                }
+                bot.SaveConfig();
             }
         }
     }
