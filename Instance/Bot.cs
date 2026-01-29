@@ -77,7 +77,7 @@ namespace DragonBot.Instance
         [property: JsonPropertyName("BotName")]
         public string BotName { get => field ??= "DragonBot"; }
         [property: JsonPropertyName("EnabledModules")]
-        public List<string> EnabledModules { get; } = ["Core:RoleButtonMessage"];
+        public List<string> EnabledModules { get; } = ["Core:RoleButtonMessage"]; //FIXME: Remove hardcoding
         [property: JsonPropertyName("ModuleConfigs")]
         public Dictionary<string, object> Configs { get; } = [];
         [property: JsonPropertyName("GuildID")]
