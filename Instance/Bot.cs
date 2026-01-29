@@ -79,7 +79,7 @@ namespace DragonBot.Instance
         [property: JsonPropertyName("EnabledModules")]
         public List<string> EnabledModules { get; } = ["Core:RoleButtonMessage"]; //FIXME: Remove hardcoding
         [property: JsonPropertyName("ModuleConfigs")]
-        public Dictionary<string, object> Configs { get; } = [];
+        public Dictionary<string, object> ModuleConfigs { get; } = [];
         [property: JsonPropertyName("GuildID")]
         public ulong GuildId { get; internal set; }
     }
