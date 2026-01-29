@@ -31,9 +31,9 @@ namespace DragonBot.Instance
                 .Build();
             DefaultToken = config.GetSection("BotToken").Value!;
 #endif
-            if (File.Exists(Path.Combine(Settings!.InstanceConfigDir, botName, ".json")))
+            if (File.Exists(Path.Combine(Settings!.InstanceConfigDir, $"{botName}.json")))
             {
-                using StreamReader r = new(Path.Combine(Settings!.InstanceConfigDir, botName, ".json"));
+                using StreamReader r = new(Path.Combine(Settings!.InstanceConfigDir, $"{botName}.json"));
                 string json = r.ReadToEnd();
                 BotConfig = JsonSerializer.Deserialize<BotConfig>(json)!;
             }
