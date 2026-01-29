@@ -23,7 +23,7 @@ namespace DragonBot.Modules
             if (bot.BotConfig.ModuleConfigs.TryGetValue(Name, out var obj) && obj is Dictionary<string, RoleButtonMessageConfig> configs)
             {
                 MessageConfigs = configs;
-        }
+            }
         }
         public async void RegisterCommands()
         {
@@ -39,7 +39,6 @@ namespace DragonBot.Modules
                     .AddOption(new SlashCommandOptionBuilder()
                         .WithName("create")
                         .WithDescription("Creates a new role button message")
-                        //.WithRequired(true)
                         .WithType(ApplicationCommandOptionType.SubCommand)
                         .AddOption("channel", ApplicationCommandOptionType.Channel, "The channel to create the message in", true)
                         .AddOption("title", ApplicationCommandOptionType.String, "The title of the role button message", true)
@@ -47,7 +46,6 @@ namespace DragonBot.Modules
                     ).AddOption(new SlashCommandOptionBuilder()
                         .WithName("add-button")
                         .WithDescription("Adds a button to an existing role button message")
-                        //.WithRequired(true)
                         .WithType(ApplicationCommandOptionType.SubCommand)
                         .AddOption("message-id", ApplicationCommandOptionType.String, "The ID or Name of the role button message", true)
                         .AddOption("role", ApplicationCommandOptionType.Role, "The role to assign/unassign", true)
@@ -56,7 +54,6 @@ namespace DragonBot.Modules
                     ).AddOption(new SlashCommandOptionBuilder()
                         .WithName("remove-button")
                         .WithDescription("Removes a button from an existing role button message")
-                        //.WithRequired(true)
                         .WithType(ApplicationCommandOptionType.SubCommand)
                         .AddOption("message-id", ApplicationCommandOptionType.String, "The ID or Name of the role button message", true)
                         .AddOption("role", ApplicationCommandOptionType.Role, "The role assigned to the button to remove", true)
@@ -82,7 +79,6 @@ namespace DragonBot.Modules
         }
         private async Task HandleCommands(SocketSlashCommand command)
         {
-            //TODO: Replace selectng options by index with a more robust method
             //TODO: General cleanup
             SocketChannel? channel;
             SocketGuild Guild = bot.Client.GetGuild(bot.BotConfig.GuildId);
@@ -91,7 +87,7 @@ namespace DragonBot.Modules
             MessageConfigs.TryGetValue(options.First().Value.ToString()!, out var config);
 
             // /role-button-message create channel:#bot-test title:TestTitle name:TestName
-
+            // /role-button-message add-button message-id:TestName role:@Sailor label:Barotrauma emote:Barotrauma
             if (commandName is "create")
             {
                 channel = (SocketChannel?)options.First(option => option.Name is "channel").Value;
@@ -100,8 +96,8 @@ namespace DragonBot.Modules
                     await command.RespondAsync($"The specified channel is {(channel is null ? "null" : "not a text channel")}.", ephemeral: true);
                     return;
                 }
-                //FIX: System.ArgumentException: 'At least one of 'Content', 'Embeds', 'Components', 'Stickers', 'Attachments' or 'Poll' must be specified.'
-                var message = await Guild.GetTextChannel(channel.Id).SendMessageAsync();
+                ComponentBuilderV2 builder = new();
+                var message = await Guild.GetTextChannel(channel.Id).SendMessageAsync(components: builder.WithTextDisplay("Use `/role-button-message add-button` to add buttons").Build(), flags: MessageFlags.ComponentsV2);
                 string? configKey;
                 if (options.Count > 2 && options.First(option => option.Name is "name")?.Value is not null)
                 {
@@ -111,7 +107,7 @@ namespace DragonBot.Modules
                 {
                     configKey = message.Id.ToString();
                 }
-                MessageConfigs.Add(configKey!, new RoleButtonMessageConfig(message.Id, channel.Id, options.ElementAt(1).Value.ToString() ?? string.Empty, []));
+                MessageConfigs.Add(configKey!, new RoleButtonMessageConfig(message.Id, channel.Id, options.First(option => option.Name is "title").Value.ToString() ?? string.Empty, []));
                 bot.SaveConfig();
             }
             else if (commandName is "add-button" or "remove-button")
@@ -121,9 +117,9 @@ namespace DragonBot.Modules
                     await command.RespondAsync($"No message with Id {options.First(option => option.Name is "message-id").Value} exists.", ephemeral: true);
                     return;
                 }
-                (string Label, ulong RoleId, string? Emote) = ((string)options.First(option => option.Name is "label").Value, (ulong)options.First(option => option.Name is "role").Value, (string?)options.First(option => option.Name is "emote").Value);
+                (string Label, ulong RoleId, string? Emote) = ((string)options.First(option => option.Name is "label").Value, bot.RoleManager.NameToId(options.First(option => option.Name is "role").Value.ToString() ?? string.Empty), (string?)options.First(option => option.Name is "emote").Value);
                 if (commandName is "add-button")
-                {
+                {//FIXME: add check for already existing
                     config.Buttons.Add(RoleId, new ButtonData(Label, RoleId, Emote));
                 }
                 else if (commandName is "remove-button")
