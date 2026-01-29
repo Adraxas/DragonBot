@@ -20,17 +20,17 @@ namespace DragonBot.Instance
         {
             await User.RemoveRoleAsync(role);
         }
-        public async Task<bool> HasRole(ulong UserId, IRole role)
+        public bool HasRole(ulong UserId, IRole role)
         {
             var user = Guild.GetUser(UserId);
             return user.Roles.Contains(role);
         }
-        public async Task<string> IdToName(ulong roleId)
+        public string IdToName(ulong roleId)
         {
             var role = bot.Client.GetGuild(bot.BotConfig.GuildId).GetRole(roleId);
             return role.Name;
         }
-        public async Task<ulong> NameToId(string roleName)
+        public ulong NameToId(string roleName)
         {
             var role = bot.Client.GetGuild(bot.BotConfig.GuildId).Roles.FirstOrDefault(r => r.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase));
             return role?.Id ?? 0;
