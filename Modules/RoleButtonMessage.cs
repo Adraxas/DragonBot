@@ -63,13 +63,13 @@ namespace DragonBot.Modules
                 {
                     await guild.CreateApplicationCommandAsync(builder.Build());
                 }
-                catch(ApplicationCommandException ex)
+                catch (ApplicationCommandException ex)
                 {
                     var json = JsonSerializer.Serialize(ex.Errors);
                     await Program.Log($@"ApplicationCommandException thrown during command registration for command {builder.Name}
                     Errors reported: {json}", LogSeverity.Error);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     await Program.Log($"Exeption {ex} thrown during command registration for command {builder.Name}", LogSeverity.Error);
                 }
